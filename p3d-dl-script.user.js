@@ -30,18 +30,6 @@ function OBJforGeometry(geometry) {
         if (!perVertexNormals[face.d]) 
             perVertexNormals[face.d] = face.vertexNormals[3];
     }
-    for (i = 0; i < geometry.faceVertexUvs[0].length; ++i) {
-        var vertexUvs = geometry.faceVertexUvs[0][i];
-        for (var j = 0; j < vertexUvs.length; ++j) {
-            var uv = vertexUvs[j];
-            if (uv.u == undefined) {
-          	  s += 'vt ' + uv.x + ' ' + (1.0 - uv.y) + '\n';
-            }
-            else {
-          	  s += 'vt ' + uv.u + ' ' + (1.0 - uv.v) + '\n';
-            }
-        }
-    }
     for (i = 0; i < perVertexNormals.length; ++i) {
         var vn = perVertexNormals[i];
         if (!vn)
@@ -49,17 +37,36 @@ function OBJforGeometry(geometry) {
         s += 'vn ' + vn.x + ' ' + vn.y + ' ' + vn.z + '\n';
     }
     var uvIndex = 0;
-    for (i = 0; i < geometry.faces.length; ++i) {
-        var face = geometry.faces[i];
-        s += 'f ';
-        s += (face.a + 1) + '/' + (++uvIndex) + '/' + (face.a + 1) + ' ';
-        s += (face.b + 1) + '/' + (++uvIndex) + '/' + (face.b + 1) + ' ';
-        s += (face.c + 1) + '/' + (++uvIndex) + '/' + (face.c + 1) + ' ';
-        if (face.d !== undefined) {
-            s += (face.d + 1) + '/' + (++uvIndex) + '/' + (face.d + 1);
-        }
-        s += '\n';
-    }
+	for (var grp_idx = 0; grp_idx < geometry.geometryGroupsList.length; ++grp_idx) {
+		var grp = geometry.geometryGroupsList[grp_idx];
+		s += 'usemtl mtl' + grp.materialIndex + '\n';
+		
+		for (var face_grp_idx = 0; face_grp_idx	< grp.faces3.length; ++face_grp_idx) {
+			var face_idx = grp.faces3[face_grp_idx];
+			
+			var vertexUvs = geometry.faceVertexUvs[0][face_idx];
+			for (var j = 0; j < vertexUvs.length; ++j) {
+				var uv = vertexUvs[j];
+				if (uv.u == undefined) {
+				  s += 'vt ' + uv.x + ' ' + (1.0 - uv.y) + '\n';
+				}
+				else {
+				  s += 'vt ' + uv.u + ' ' + (1.0 - uv.v) + '\n';
+				}
+			}
+
+			var face = geometry.faces[face_idx];
+			s += 'f ';
+			s += (face.a + 1) + '/' + (++uvIndex) + '/' + (face.a + 1) + ' ';
+			s += (face.b + 1) + '/' + (++uvIndex) + '/' + (face.b + 1) + ' ';
+			s += (face.c + 1) + '/' + (++uvIndex) + '/' + (face.c + 1) + ' ';
+			if (face.d !== undefined) {
+				s += (face.d + 1) + '/' + (++uvIndex) + '/' + (face.d + 1);
+			}
+			s += '\n';
+		}
+	}
+
     return s;
 };
 
